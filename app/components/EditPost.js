@@ -30,14 +30,16 @@ const ViewSinglePost = () => {
         draft.body.value = action.value.body
         draft.isFetching = false
         return
+      case 'changedTitle':
+        draft.title.value = action.value
+        return
+      case 'changedBody':
+        draft.body.value = action.value
+        return
     }
   }
 
   const [state, dispatch] = useImmerReducer(ourReducer, initialState)
-
-  // const { id } = useParams()
-  // const [isLoading, setIsLoading] = useState(true)
-  // const [post, setPost] = useState()
 
   useEffect(() => {
     const ourRequest = Axios.CancelToken.source()
@@ -46,8 +48,6 @@ const ViewSinglePost = () => {
       try {
         const response = await Axios.get(`/post/${state.id}`)
         dispatch({ type: 'fetchComplete', value: response.data })
-        // setPost(response.data)
-        // setIsLoading(false)
       } catch (error) {
         console.error(error)
       }
@@ -72,14 +72,35 @@ const ViewSinglePost = () => {
           <label htmlFor="post-title" className="text-muted mb-1">
             <small>Title</small>
           </label>
-          <input autoFocus value={state.title.value} name="title" id="post-title" className="form-control form-control-lg form-control-title" type="text" placeholder="" autoComplete="off" />
+          <input
+            onChange={(e) => {
+              dispatch({ type: 'changedTitle', value: e.target.value })
+            }}
+            autoFocus
+            value={state.title.value}
+            name="title"
+            id="post-title"
+            className="form-control form-control-lg form-control-title"
+            type="text"
+            placeholder=""
+            autoComplete="off"
+          />
         </div>
 
         <div className="form-group">
           <label htmlFor="post-body" className="text-muted mb-1 d-block">
             <small>Body Content</small>
           </label>
-          <textarea value={state.body.value} name="body" id="post-body" className="body-content tall-textarea form-control" type="text" />
+          <textarea
+            onChange={(e) => {
+              dispatch({ type: 'changedBody', value: e.target.value })
+            }}
+            value={state.body.value}
+            name="body"
+            id="post-body"
+            className="body-content tall-textarea form-control"
+            type="text"
+          />
         </div>
 
         <button className="btn btn-primary">Save</button>
