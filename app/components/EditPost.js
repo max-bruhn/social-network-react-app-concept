@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { useImmerReducer, useImmer } from 'use-immer'
 import Page from './Page'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, withRouter } from 'react-router-dom'
 import Axios from 'axios'
 import LoadingDotsIcon from './LoadingDotsIcon'
 import DispatchContext from '../DispatchContext'
 import StateContext from '../StateContext'
+import NotFound from './NotFound'
 
-const ViewSinglePost = (props) => {
+const EditPost = (props) => {
   const appDispatch = useContext(DispatchContext)
   const appState = useContext(StateContext)
 
@@ -26,6 +27,7 @@ const ViewSinglePost = (props) => {
     isSaving: false,
     id: useParams().id,
     sendCount: 0,
+    notFound: false,
   }
 
   const ourReducer = (draft, action) => {
@@ -36,9 +38,11 @@ const ViewSinglePost = (props) => {
         draft.isFetching = false
         return
       case 'changedTitle':
+        draft.title.hasErrors = false
         draft.title.value = action.value
         return
       case 'changedBody':
+        draft.body.hasErrors = false
         draft.body.value = action.value
         return
       case 'submitRequest':
@@ -58,6 +62,15 @@ const ViewSinglePost = (props) => {
           draft.title.message = 'no title provided'
         }
         return
+      case 'bodyRules':
+        if (!action.value.trim()) {
+          draft.body.hasErrors = true
+          draft.body.message = 'no body provided'
+        }
+        return
+      case 'notFound':
+        draft.notFound = true
+        return
     }
   }
 
@@ -70,7 +83,15 @@ const ViewSinglePost = (props) => {
     const fetchPost = async () => {
       try {
         const response = await Axios.get(`/post/${state.id}`, { cancelToken: ourRequest.token })
-        dispatch({ type: 'fetchComplete', value: response.data })
+        if (response.data) {
+          dispatch({ type: 'fetchComplete', value: response.data })
+          if (appState.user.username != response.data.author.username) {
+            appDispatch({ type: 'flashMessage', value: 'access forbidden' })
+            props.history.push('/')
+          }
+        } else {
+          dispatch({ type: 'notFound' })
+        }
       } catch (error) {
         console.error(error)
       }
@@ -111,6 +132,10 @@ const ViewSinglePost = (props) => {
     }
   }, [state.sendCount])
 
+  if (state.notFound) {
+    return <NotFound />
+  }
+
   if (state.isFetching)
     return (
       <Page title="...">
@@ -121,12 +146,16 @@ const ViewSinglePost = (props) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     dispatch({ type: 'titleRules', value: state.title.value })
+    dispatch({ type: 'bodyRules', value: state.body.value })
     dispatch({ type: 'submitRequest' })
   }
 
   return (
     <Page title="Edit Post">
-      <form onSubmit={handleSubmit}>
+      <Link className="small font-weight-bold" to={`/post/${state.id}`}>
+        &laquo; Back to posts
+      </Link>
+      <form className="mt-3" onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="post-title" className="text-muted mb-1">
             <small>Title</small>
@@ -158,12 +187,16 @@ const ViewSinglePost = (props) => {
             onChange={(e) => {
               dispatch({ type: 'changedBody', value: e.target.value })
             }}
+            onBlur={(e) => {
+              dispatch({ type: 'bodyRules', value: e.target.value })
+            }}
             value={state.body.value}
             name="body"
             id="post-body"
             className="body-content tall-textarea form-control"
             type="text"
           />
+          {state.body.hasErrors && <div className="alert alert-danger small liveValidateMessage">{state.body.message}</div>}
         </div>
 
         <button className="btn btn-primary" disabled={state.isSaving} type="submit">
@@ -174,4 +207,4 @@ const ViewSinglePost = (props) => {
   )
 }
 
-export default ViewSinglePost
+export default withRouter(EditPost)
