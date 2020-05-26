@@ -129,7 +129,7 @@ const Search = () => {
                   const date = new Date(result.createdDate)
                   const dateFormatted = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
                   return (
-                    <Link to={`/post/${result._id}`} className="list-group-item list-group-item-action">
+                    <Link onClick={closeSearch} to={`/post/${result._id}`} className="list-group-item list-group-item-action">
                       <img className="avatar-tiny" src={result.author.avatar} /> <strong>{result.title}</strong>
                       <span className="text-muted small">
                         by {result.author.username} on {dateFormatted}{' '}
