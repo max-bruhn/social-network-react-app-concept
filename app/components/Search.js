@@ -12,6 +12,7 @@ const Search = () => {
     results: [],
     show: 'neither',
     requestCount: 0,
+    isFetching: false,
   })
 
   useEffect(() => {
@@ -33,13 +34,19 @@ const Search = () => {
   }, [state.searchTerm])
 
   useEffect(() => {
-    if (state.requestCount) {
+    if (state.requestCount && state.searchTerm.length) {
+      // show fetching icons at start of search
+      setState((draft) => {
+        draft.isFetching = true
+      })
+
       const ourRequest = Axios.CancelToken.source()
       const fetchResults = async () => {
         try {
           const response = await Axios.post('/search', { searchTerm: state.searchTerm }, { cancelToken: ourRequest.token })
           setState((draft) => {
             draft.results = response.data
+            draft.isFetching = false
           })
         } catch (error) {
           console.error(error)
@@ -106,9 +113,7 @@ const Search = () => {
       <div className="search-overlay-bottom">
         <div className="container container--narrow py-3">
           <div className="live-search-results live-search-results--visible">
-            <div className="list-group shadow-sm">
-              <LoadingDotsIcon />
-            </div>
+            <div className="list-group shadow-sm">{state.isFetching ? <LoadingDotsIcon /> : <SearchResults />}</div>
           </div>
         </div>
       </div>
