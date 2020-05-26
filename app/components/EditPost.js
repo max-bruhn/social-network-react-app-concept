@@ -136,12 +136,13 @@ const EditPost = (props) => {
     return <NotFound />
   }
 
-  if (state.isFetching)
+  if (state.isFetching) {
     return (
       <Page title="...">
         <LoadingDotsIcon />
       </Page>
     )
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
