@@ -24,8 +24,6 @@ const ViewSinglePost = (props) => {
         const response = await Axios.get(`/post/${id}`)
         setPost(response.data)
         setIsLoading(false)
-        console.log('response.data')
-        console.log(response.data)
       } catch (error) {
         console.error(error)
       }
