@@ -1,4 +1,5 @@
 import React, { useEffect, useContext } from 'react'
+import { Link } from 'react-router-dom'
 import DispatchContext from '../DispatchContext'
 import { useImmer } from 'use-immer'
 import Axios from 'axios'
@@ -12,7 +13,6 @@ const Search = () => {
     results: [],
     show: 'neither',
     requestCount: 0,
-    isFetching: false,
   })
 
   useEffect(() => {
@@ -24,29 +24,30 @@ const Search = () => {
   }, [])
 
   useEffect(() => {
-    const delay = setTimeout(() => {
+    if (state.searchTerm.trim()) {
+      const delay = setTimeout(() => {
+        setState((draft) => {
+          draft.requestCount++
+          draft.show = 'loading'
+        })
+      }, 1000)
+      return () => clearTimeout(delay)
+    } else {
       setState((draft) => {
-        draft.requestCount++
+        draft.show = 'neither'
       })
-    }, 1000)
-
-    return () => clearTimeout(delay)
+    }
   }, [state.searchTerm])
 
   useEffect(() => {
     if (state.requestCount && state.searchTerm.length) {
-      // show fetching icons at start of search
-      setState((draft) => {
-        draft.isFetching = true
-      })
-
       const ourRequest = Axios.CancelToken.source()
       const fetchResults = async () => {
         try {
           const response = await Axios.post('/search', { searchTerm: state.searchTerm }, { cancelToken: ourRequest.token })
           setState((draft) => {
             draft.results = response.data
-            draft.isFetching = false
+            draft.show = 'results'
           })
         } catch (error) {
           console.error(error)
@@ -78,20 +79,21 @@ const Search = () => {
     return (
       <div>
         <div className="list-group-item active">
-          <strong>Search Results</strong> (3 items found)
+          <strong>Search Results</strong> ({state.results.length}
+          {state.results.length == 1 ? ' item ' : ' items '} found)
         </div>
-        <a href="#" className="list-group-item list-group-item-action">
-          <img className="avatar-tiny" src="https://gravatar.com/avatar/b9408a09298632b5151200f3449434ef?s=128" /> <strong>Example Post #1</strong>
-          <span className="text-muted small">by brad on 2/10/2020 </span>
-        </a>
-        <a href="#" className="list-group-item list-group-item-action">
-          <img className="avatar-tiny" src="https://gravatar.com/avatar/b9216295c1e3931655bae6574ac0e4c2?s=128" /> <strong>Example Post #2</strong>
-          <span className="text-muted small">by barksalot on 2/10/2020 </span>
-        </a>
-        <a href="#" className="list-group-item list-group-item-action">
-          <img className="avatar-tiny" src="https://gravatar.com/avatar/b9408a09298632b5151200f3449434ef?s=128" /> <strong>Example Post #3</strong>
-          <span className="text-muted small">by brad on 2/10/2020 </span>
-        </a>
+        {state.results.map((result) => {
+          const date = new Date(result.createdDate)
+          const dateFormatted = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
+          return (
+            <Link to={`/post/${result._id}`} className="list-group-item list-group-item-action">
+              <img className="avatar-tiny" src={result.author.avatar} /> <strong>{result.title}</strong>
+              <span className="text-muted small">
+                by {result.author.username} on {dateFormatted}{' '}
+              </span>
+            </Link>
+          )
+        })}
       </div>
     )
   }
@@ -113,7 +115,30 @@ const Search = () => {
       <div className="search-overlay-bottom">
         <div className="container container--narrow py-3">
           <div className="live-search-results live-search-results--visible">
-            <div className="list-group shadow-sm">{state.isFetching ? <LoadingDotsIcon /> : <SearchResults />}</div>
+            <div className="list-group shadow-sm">
+              <div className={'dots-loading ' + (state.show == 'loading' ? '' : 'hide')}>
+                <div></div>
+              </div>
+
+              <div className={state.show == 'results' ? '' : 'hide'}>
+                <div className="list-group-item active">
+                  <strong>Search Results</strong> ({state.results.length}
+                  {state.results.length == 1 ? ' item ' : ' items '} found)
+                </div>
+                {state.results.map((result) => {
+                  const date = new Date(result.createdDate)
+                  const dateFormatted = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
+                  return (
+                    <Link to={`/post/${result._id}`} className="list-group-item list-group-item-action">
+                      <img className="avatar-tiny" src={result.author.avatar} /> <strong>{result.title}</strong>
+                      <span className="text-muted small">
+                        by {result.author.username} on {dateFormatted}{' '}
+                      </span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </div>

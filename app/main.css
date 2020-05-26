@@ -1,5 +1,9 @@
 body {
-  font-family: "Public Sans", sans-serif;
+  font-family: 'Public Sans', sans-serif;
+}
+
+.hide {
+  display: none;
 }
 
 .header-bar {
@@ -520,7 +524,7 @@ textarea.tall-textarea {
 
 .dots-loading::before,
 .dots-loading::after {
-  content: " ";
+  content: ' ';
 }
 
 .dots-loading div,
