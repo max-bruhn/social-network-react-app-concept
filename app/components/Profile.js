@@ -111,7 +111,9 @@ const Profile = () => {
   return (
     <Page title="Profile">
       <h2>
-        <img className="avatar-small" src={state.profileData.profileAvatar} /> {state.profileData.profileUsername}
+        <img className="avatar-small" src={state.profileData.profileAvatar} />
+        {state.profileData.profileUsername}
+
         {appState.loggedIn && !state.profileData.isFollowing && appState.user.username != state.profileData.profileUsername && state.profileData.profileUsername != '...' && (
           <button onClick={startFollowing} disabled={state.followActionLoading} className="btn btn-primary btn-sm ml-2">
             Follow <i className="fas fa-user-plus"></i>
@@ -128,7 +130,7 @@ const Profile = () => {
         <NavLink exact to={`/profile/${state.profileData.profileUsername}`} className=" nav-item nav-link">
           Posts: {state.profileData.counts.postCount}
         </NavLink>
-        <NavLink to={`/profile/${state.profileData.profileUsername}/follower`} className="nav-item nav-link">
+        <NavLink to={`/profile/${state.profileData.profileUsername}/followers`} className="nav-item nav-link">
           Followers: {state.profileData.counts.followerCount}
         </NavLink>
         <NavLink to={`/profile/${state.profileData.profileUsername}/following`} className="nav-item nav-link">

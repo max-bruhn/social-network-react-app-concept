@@ -31,14 +31,16 @@ const ProfileFollowing = () => {
 
   return (
     <div className="list-group">
-      {posts.map((follower, id) => {
-        return (
-          <Link key={id} to={`/profile/${follower.username}`} className="list-group-item list-group-item-action">
-            <img className="avatar-tiny" src={follower.avatar} />
-            {follower.username}
-          </Link>
-        )
-      })}
+      {posts.length >= 1 &&
+        posts.map((follower, id) => {
+          return (
+            <Link key={id} to={`/profile/${follower.username}`} className="list-group-item list-group-item-action">
+              <img className="avatar-tiny" src={follower.avatar} />
+              {follower.username}
+            </Link>
+          )
+        })}
+      {posts.length == 0 && <p>Following nobody!</p>}
     </div>
   )
 }

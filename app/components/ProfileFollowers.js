@@ -7,7 +7,6 @@ const ProfileFollowers = () => {
   const { username } = useParams()
   const [isLoading, setIsLoading] = useState(true)
   const [posts, setPosts] = useState([])
-
   useEffect(() => {
     const ourRequest = Axios.CancelToken.source()
 
@@ -16,7 +15,7 @@ const ProfileFollowers = () => {
         const response = await Axios.get(`/profile/${username}/followers`, { cancelToken: ourRequest.token })
         setPosts(response.data)
         setIsLoading(false)
-        // console.log(response.data)
+        console.log(response.data)
       } catch (error) {
         console.error(error)
       }
@@ -25,20 +24,26 @@ const ProfileFollowers = () => {
     return () => {
       ourRequest.cancel()
     }
-  }, [username])
+  }, [username, posts])
 
   if (isLoading) return <LoadingDotsIcon />
 
   return (
     <div className="list-group">
-      {posts.map((follower, id) => {
-        return (
-          <Link key={id} to={`/profile/${follower.username}`} className="list-group-item list-group-item-action">
-            <img className="avatar-tiny" src={follower.avatar} />
-            {follower.username}
-          </Link>
-        )
-      })}
+      {posts.length >= 1 &&
+        posts.map((follower, id) => {
+          return (
+            <Link key={id} to={`/profile/${follower.username}`} className="list-group-item list-group-item-action">
+              <img className="avatar-tiny" src={follower.avatar} />
+              {follower.username}
+            </Link>
+          )
+        })}
+      {posts.length == 0 && (
+        <div className="list-group">
+          <p>No followers. </p>
+        </div>
+      )}
     </div>
   )
 }
