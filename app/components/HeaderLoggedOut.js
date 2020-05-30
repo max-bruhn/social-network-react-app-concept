@@ -17,8 +17,9 @@ const HeaderLoggedOut = (props) => {
       })
       if (response.data) {
         appDispatch({ type: 'login', data: response.data })
+        appDispatch({ type: 'flashMessage', value: 'Successful login.' })
       } else {
-        console.error('wrong data')
+        appDispatch({ type: 'flashMessage', value: 'Invalid login credentials.' })
       }
     } catch (e) {
       console.error(e.response.data)

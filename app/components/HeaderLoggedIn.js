@@ -10,6 +10,7 @@ const HeaderLoggedIn = (props) => {
 
   const handleLogout = () => {
     appDispatch({ type: 'logout' })
+    appDispatch({ type: 'flashMessage', value: 'Successful logout.' })
   }
 
   const handleSearchIcon = (e) => {
